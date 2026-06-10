@@ -1,0 +1,6 @@
+{
+    "name": "Unicore.Tests",
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}
