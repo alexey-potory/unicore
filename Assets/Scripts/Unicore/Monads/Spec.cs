@@ -1,85 +1,33 @@
 ﻿using System;
+using Unicore.Monads.Internal;
 
 namespace Unicore.Monads
 {
-    public interface ISpecRule<in T>
-    {
-        bool IsSatisfiedBy(T value);
-    }
-
-    internal readonly struct PredicateSpecRule<T> : ISpecRule<T>
-    {
-        private readonly Func<T, bool> _predicate;
-
-        public PredicateSpecRule(Func<T, bool> predicate) => _predicate = predicate;
-
-        public bool IsSatisfiedBy(T value) => _predicate(value);
-    }
-
-    internal readonly struct AllOfSpecRule<T> : ISpecRule<T>
-    {
-        private readonly ISpecRule<T>[] _rules;
-
-        public AllOfSpecRule(params ISpecRule<T>[] rules) => _rules = rules;
-
-        public bool IsSatisfiedBy(T value)
-        {
-            foreach (var rule in _rules)
-            {
-                if (!rule.IsSatisfiedBy(value))
-                    return false;
-            }
-
-            return true;
-        }
-    }
-
-    internal readonly struct AnyOfSpecRule<T> : ISpecRule<T>
-    {
-        private readonly ISpecRule<T>[] _rules;
-
-        public AnyOfSpecRule(params ISpecRule<T>[] rules) => _rules = rules;
-
-        public bool IsSatisfiedBy(T value)
-        {
-            foreach (var rule in _rules)
-            {
-                if (rule.IsSatisfiedBy(value))
-                    return true;
-            }
-
-            return false;
-        }
-    }
-
-    internal readonly struct NegatedSpecRule<T> : ISpecRule<T>
-    {
-        private readonly ISpecRule<T> _rule;
-
-        public NegatedSpecRule(ISpecRule<T> rule) => _rule = rule;
-
-        public bool IsSatisfiedBy(T value) => !_rule.IsSatisfiedBy(value);
-    }
-
     public readonly struct Spec<T>
     {
-        private readonly ISpecRule<T> _rule;
+        public interface ISpecRule
+        {
+            bool IsSatisfiedBy(T value);
+        }
+
+        private readonly ISpecRule _rule;
 
         public static Spec<T> Create(Func<T, bool> predicate) => new(predicate);
+
         public static Spec<T> All(params Spec<T>[] specs) => specs.Length == 0
             ? AlwaysTrue()
-            : new(new AllOfSpecRule<T>(ToRules(specs)));
+            : new Spec<T>(new AllOfSpecRule<T>(ToRules(specs)));
 
         public static Spec<T> Any(params Spec<T>[] specs) => specs.Length == 0
             ? AlwaysFalse()
-            : new(new AnyOfSpecRule<T>(ToRules(specs)));
+            : new Spec<T>(new AnyOfSpecRule<T>(ToRules(specs)));
 
         public static Spec<T> Not(Spec<T> spec) => spec.Not();
         public static Spec<T> AlwaysTrue() => new(_ => true);
         public static Spec<T> AlwaysFalse() => new(_ => false);
 
         public Spec(Func<T, bool> predicate) => _rule = new PredicateSpecRule<T>(predicate);
-        public Spec(ISpecRule<T> rule) => _rule = rule;
+        public Spec(ISpecRule rule) => _rule = rule;
 
         public bool IsSatisfiedBy(T value) => _rule.IsSatisfiedBy(value);
         public bool IsNotSatisfiedBy(T value) => !IsSatisfiedBy(value);
@@ -116,9 +64,9 @@ namespace Unicore.Monads
         public Spec<T> Not() =>
             new(new NegatedSpecRule<T>(_rule));
 
-        private static ISpecRule<T>[] ToRules(Spec<T>[] specs)
+        private static ISpecRule[] ToRules(Spec<T>[] specs)
         {
-            var rules = new ISpecRule<T>[specs.Length];
+            var rules = new ISpecRule[specs.Length];
 
             for (var i = 0; i < specs.Length; i++)
                 rules[i] = specs[i]._rule;
