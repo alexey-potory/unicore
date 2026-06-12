@@ -1,4 +1,5 @@
 using System;
+using Cysharp.Threading.Tasks;
 using Unicore.Exceptions;
 using Unicore.Monads.Internal;
 
@@ -79,6 +80,30 @@ namespace Unicore.Monads
             Func<TContext, Exception, TReturn> mapFailure);
 
         /// <summary>
+        /// Projects result into another value asynchronously by selecting one mapping function based on current state.
+        /// </summary>
+        /// <typeparam name="TReturn">Type of mapped value.</typeparam>
+        /// <param name="mapSuccess">A mapping function for successful value.</param>
+        /// <param name="mapFailure">A mapping function for failure exception.</param>
+        /// <returns>A task that produces mapped value from selected mapper.</returns>
+        public abstract UniTask<TReturn> MapAsync<TReturn>(
+            Func<T, UniTask<TReturn>> mapSuccess,
+            Func<Exception, UniTask<TReturn>> mapFailure);
+
+        /// <summary>
+        /// Projects result into another value asynchronously by selecting one mapping function based on current state and passing shared context.
+        /// </summary>
+        /// <typeparam name="TContext">Type of shared context.</typeparam>
+        /// <typeparam name="TReturn">Type of mapped value.</typeparam>
+        /// <param name="context">A context value passed to selected mapper.</param>
+        /// <param name="mapSuccess">A mapping function for successful value.</param>
+        /// <param name="mapFailure">A mapping function for failure exception.</param>
+        /// <returns>A task that produces mapped value from selected mapper.</returns>
+        public abstract UniTask<TReturn> MapAsync<TContext, TReturn>(TContext context,
+            Func<TContext, T, UniTask<TReturn>> mapSuccess,
+            Func<TContext, Exception, UniTask<TReturn>> mapFailure);
+
+        /// <summary>
         /// Executes one action based on current state.
         /// </summary>
         /// <param name="matchSuccess">An action for successful value.</param>
@@ -94,6 +119,27 @@ namespace Unicore.Monads
         /// <param name="matchFailure">An action for failure exception.</param>
         public abstract void Match<TContext>(TContext context, Action<TContext, T> matchSuccess,
             Action<TContext, Exception> matchFailure);
+
+        /// <summary>
+        /// Executes one asynchronous action based on current state.
+        /// </summary>
+        /// <param name="matchSuccess">An action for successful value.</param>
+        /// <param name="matchFailure">An action for failure exception.</param>
+        /// <returns>A task that completes when selected action finishes.</returns>
+        public abstract UniTask MatchAsync(Func<T, UniTask> matchSuccess,
+            Func<Exception, UniTask> matchFailure);
+
+        /// <summary>
+        /// Executes one asynchronous action based on current state and passes shared context.
+        /// </summary>
+        /// <typeparam name="TContext">Type of shared context.</typeparam>
+        /// <param name="context">A context value passed to selected action.</param>
+        /// <param name="matchSuccess">An action for successful value.</param>
+        /// <param name="matchFailure">An action for failure exception.</param>
+        /// <returns>A task that completes when selected action finishes.</returns>
+        public abstract UniTask MatchAsync<TContext>(TContext context,
+            Func<TContext, T, UniTask> matchSuccess,
+            Func<TContext, Exception, UniTask> matchFailure);
 
         /// <summary>
         /// Chains another result-producing operation that runs only for successful result.
@@ -115,6 +161,25 @@ namespace Unicore.Monads
             Func<TContext, T, Result<TReturn>> binder);
 
         /// <summary>
+        /// Chains another asynchronously produced result that runs only for successful result.
+        /// </summary>
+        /// <typeparam name="TReturn">Type of chained successful value.</typeparam>
+        /// <param name="binder">A function that produces next result from successful value.</param>
+        /// <returns>A task that produces chained result.</returns>
+        public abstract UniTask<Result<TReturn>> BindAsync<TReturn>(Func<T, UniTask<Result<TReturn>>> binder);
+
+        /// <summary>
+        /// Chains another asynchronously produced result that runs only for successful result and passes shared context.
+        /// </summary>
+        /// <typeparam name="TContext">Type of shared context.</typeparam>
+        /// <typeparam name="TReturn">Type of chained successful value.</typeparam>
+        /// <param name="context">A context value passed to <paramref name="binder" />.</param>
+        /// <param name="binder">A function that produces next result from successful value.</param>
+        /// <returns>A task that produces chained result.</returns>
+        public abstract UniTask<Result<TReturn>> BindAsync<TContext, TReturn>(TContext context,
+            Func<TContext, T, UniTask<Result<TReturn>>> binder);
+
+        /// <summary>
         /// Executes side effect for successful result and returns current result.
         /// </summary>
         /// <param name="tapSuccess">An action for successful value.</param>
@@ -131,6 +196,22 @@ namespace Unicore.Monads
         public abstract Result<T> Tap<TContext>(TContext context, Action<TContext, T> tapSuccess);
 
         /// <summary>
+        /// Executes asynchronous side effect for successful result and returns current result.
+        /// </summary>
+        /// <param name="tapSuccess">An action for successful value.</param>
+        /// <returns>A task that produces current result instance.</returns>
+        public abstract UniTask<Result<T>> TapAsync(Func<T, UniTask> tapSuccess);
+
+        /// <summary>
+        /// Executes asynchronous side effect for successful result with shared context and returns current result.
+        /// </summary>
+        /// <typeparam name="TContext">Type of shared context.</typeparam>
+        /// <param name="context">A context value passed to <paramref name="tapSuccess" />.</param>
+        /// <param name="tapSuccess">An action for successful value.</param>
+        /// <returns>A task that produces current result instance.</returns>
+        public abstract UniTask<Result<T>> TapAsync<TContext>(TContext context, Func<TContext, T, UniTask> tapSuccess);
+
+        /// <summary>
         /// Executes side effect for failed result and returns current result.
         /// </summary>
         /// <param name="tapError">An action for failure exception.</param>
@@ -145,6 +226,23 @@ namespace Unicore.Monads
         /// <param name="tapError">An action for failure exception.</param>
         /// <returns>Current result instance.</returns>
         public abstract Result<T> TapError<TContext>(TContext context, Action<TContext, Exception> tapError);
+
+        /// <summary>
+        /// Executes asynchronous side effect for failed result and returns current result.
+        /// </summary>
+        /// <param name="tapError">An action for failure exception.</param>
+        /// <returns>A task that produces current result instance.</returns>
+        public abstract UniTask<Result<T>> TapErrorAsync(Func<Exception, UniTask> tapError);
+
+        /// <summary>
+        /// Executes asynchronous side effect for failed result with shared context and returns current result.
+        /// </summary>
+        /// <typeparam name="TContext">Type of shared context.</typeparam>
+        /// <param name="context">A context value passed to <paramref name="tapError" />.</param>
+        /// <param name="tapError">An action for failure exception.</param>
+        /// <returns>A task that produces current result instance.</returns>
+        public abstract UniTask<Result<T>> TapErrorAsync<TContext>(TContext context,
+            Func<TContext, Exception, UniTask> tapError);
 
         /// <summary>
         /// Logs failure exception when result is failed.
@@ -190,6 +288,23 @@ namespace Unicore.Monads
         public abstract T GetOrDefault<TContext>(TContext context, Func<TContext, T> defaultValueFactory);
 
         /// <summary>
+        /// Gets successful value or value produced asynchronously by fallback factory when result is failed.
+        /// </summary>
+        /// <param name="defaultValueFactory">A factory that produces fallback value.</param>
+        /// <returns>A task that produces successful value or fallback value.</returns>
+        public abstract UniTask<T> GetOrDefaultAsync(Func<UniTask<T>> defaultValueFactory);
+
+        /// <summary>
+        /// Gets successful value or value produced asynchronously by fallback factory with shared context when result is failed.
+        /// </summary>
+        /// <typeparam name="TContext">Type of shared context.</typeparam>
+        /// <param name="context">A context value passed to <paramref name="defaultValueFactory" />.</param>
+        /// <param name="defaultValueFactory">A factory that produces fallback value.</param>
+        /// <returns>A task that produces successful value or fallback value.</returns>
+        public abstract UniTask<T> GetOrDefaultAsync<TContext>(TContext context,
+            Func<TContext, UniTask<T>> defaultValueFactory);
+
+        /// <summary>
         /// Converts failed result into successful result with provided fallback value.
         /// </summary>
         /// <param name="defaultValue">A fallback value.</param>
@@ -212,6 +327,24 @@ namespace Unicore.Monads
         /// <param name="defaultValueFactory">A factory that produces fallback value.</param>
         /// <returns>Current successful result or a new successful fallback result.</returns>
         public abstract Result<T> Ensure<TContext>(TContext context, Func<TContext, T> defaultValueFactory);
+
+        /// <summary>
+        /// Converts failed result into successful result with value produced asynchronously by fallback factory.
+        /// </summary>
+        /// <typeparam name="TContext">Type parameter reserved by current API shape.</typeparam>
+        /// <param name="defaultValueFactory">A factory that produces fallback value.</param>
+        /// <returns>A task that produces current successful result or a new successful fallback result.</returns>
+        public abstract UniTask<Result<T>> EnsureAsync<TContext>(Func<UniTask<T>> defaultValueFactory);
+
+        /// <summary>
+        /// Converts failed result into successful result with value produced asynchronously by fallback factory and shared context.
+        /// </summary>
+        /// <typeparam name="TContext">Type of shared context.</typeparam>
+        /// <param name="context">A context value passed to <paramref name="defaultValueFactory" />.</param>
+        /// <param name="defaultValueFactory">A factory that produces fallback value.</param>
+        /// <returns>A task that produces current successful result or a new successful fallback result.</returns>
+        public abstract UniTask<Result<T>> EnsureAsync<TContext>(TContext context,
+            Func<TContext, UniTask<T>> defaultValueFactory);
     }
 
     /// <summary>
