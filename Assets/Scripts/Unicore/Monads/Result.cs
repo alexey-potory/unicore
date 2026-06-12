@@ -402,6 +402,24 @@ namespace Unicore.Monads
         }
 
         /// <summary>
+        /// Executes asynchronous action and captures its outcome as a result.
+        /// </summary>
+        /// <param name="action">An action to execute.</param>
+        /// <returns>A task that produces successful unit result when <paramref name="action" /> completes; otherwise, a failed result with thrown exception.</returns>
+        public static async UniTask<Result<Unit>> TryAsync(Func<UniTask> action)
+        {
+            try
+            {
+                await action();
+                return Result<Unit>.Success();
+            }
+            catch (Exception e)
+            {
+                return Result<Unit>.Failure(e);
+            }
+        }
+
+        /// <summary>
         /// Executes action with shared context and captures its outcome as a result.
         /// </summary>
         /// <typeparam name="TContext">Type of shared context.</typeparam>
@@ -413,6 +431,26 @@ namespace Unicore.Monads
             try
             {
                 action(context);
+                return Result<Unit>.Success();
+            }
+            catch (Exception e)
+            {
+                return Result<Unit>.Failure(e);
+            }
+        }
+
+        /// <summary>
+        /// Executes asynchronous action with shared context and captures its outcome as a result.
+        /// </summary>
+        /// <typeparam name="TContext">Type of shared context.</typeparam>
+        /// <param name="context">A context value passed to <paramref name="action" />.</param>
+        /// <param name="action">An action to execute.</param>
+        /// <returns>A task that produces successful unit result when <paramref name="action" /> completes; otherwise, a failed result with thrown exception.</returns>
+        public static async UniTask<Result<Unit>> TryAsync<TContext>(TContext context, Func<TContext, UniTask> action)
+        {
+            try
+            {
+                await action(context);
                 return Result<Unit>.Success();
             }
             catch (Exception e)
@@ -440,6 +478,24 @@ namespace Unicore.Monads
         }
 
         /// <summary>
+        /// Executes asynchronous function and captures its outcome as a result.
+        /// </summary>
+        /// <typeparam name="T">Type of successful value.</typeparam>
+        /// <param name="func">A function to execute.</param>
+        /// <returns>A task that produces successful result with returned value when <paramref name="func" /> completes; otherwise, a failed result with thrown exception.</returns>
+        public static async UniTask<Result<T>> TryAsync<T>(Func<UniTask<T>> func)
+        {
+            try
+            {
+                return Result<T>.Success(await func.Invoke());
+            }
+            catch (Exception e)
+            {
+                return Result<T>.Failure(e);
+            }
+        }
+
+        /// <summary>
         /// Executes function with shared context and captures its outcome as a result.
         /// </summary>
         /// <typeparam name="T">Type of successful value.</typeparam>
@@ -452,6 +508,26 @@ namespace Unicore.Monads
             try
             {
                 return Result<T>.Success(func.Invoke(context));
+            }
+            catch (Exception e)
+            {
+                return Result<T>.Failure(e);
+            }
+        }
+
+        /// <summary>
+        /// Executes asynchronous function with shared context and captures its outcome as a result.
+        /// </summary>
+        /// <typeparam name="T">Type of successful value.</typeparam>
+        /// <typeparam name="TContext">Type of shared context.</typeparam>
+        /// <param name="context">A context value passed to <paramref name="func" />.</param>
+        /// <param name="func">A function to execute.</param>
+        /// <returns>A task that produces successful result with returned value when <paramref name="func" /> completes; otherwise, a failed result with thrown exception.</returns>
+        public static async UniTask<Result<T>> TryAsync<T, TContext>(TContext context, Func<TContext, UniTask<T>> func)
+        {
+            try
+            {
+                return Result<T>.Success(await func.Invoke(context));
             }
             catch (Exception e)
             {

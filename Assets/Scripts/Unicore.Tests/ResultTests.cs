@@ -862,6 +862,40 @@ namespace Unicore.Tests
             Assert.That(thrown, Is.SameAs(error));
         }
 
+        [UnityTest]
+        public IEnumerator TryAsync_Action_OnSuccess_ReturnsSuccessfulUnitResult()
+        {
+            return UniTask.ToCoroutine(async () =>
+            {
+                var called = false;
+
+                var result = await Result.TryAsync(() =>
+                {
+                    called = true;
+                    return UniTask.CompletedTask;
+                });
+
+                Assert.That(called, Is.True);
+                Assert.That(result.IsSuccess, Is.True);
+                Assert.That(result.Value, Is.EqualTo(Unit.Value));
+            });
+        }
+
+        [UnityTest]
+        public IEnumerator TryAsync_Action_OnException_ReturnsFailureWithSameError()
+        {
+            return UniTask.ToCoroutine(async () =>
+            {
+                var error = new InvalidOperationException("boom");
+
+                var result = await Result.TryAsync(() => UniTask.FromException(error));
+
+                Assert.That(result.IsFailure, Is.True);
+                var thrown = Assert.Throws<InvalidOperationException>(() => result.GetOrThrow());
+                Assert.That(thrown, Is.SameAs(error));
+            });
+        }
+
         [Test]
         public void Try_ActionWithContext_UsesContextAndCapturesExceptions()
         {
@@ -877,6 +911,28 @@ namespace Unicore.Tests
             Assert.That(thrown, Is.SameAs(error));
         }
 
+        [UnityTest]
+        public IEnumerator TryAsync_ActionWithContext_UsesContextAndCapturesExceptions()
+        {
+            return UniTask.ToCoroutine(async () =>
+            {
+                LogAssert.Expect(LogType.Log, "ctx");
+                var success = await Result.TryAsync("ctx", context =>
+                {
+                    Debug.Log(context);
+                    return UniTask.CompletedTask;
+                });
+
+                var error = new InvalidOperationException("boom");
+                var failure = await Result.TryAsync("ctx", _ => UniTask.FromException(error));
+
+                Assert.That(success.IsSuccess, Is.True);
+                Assert.That(failure.IsFailure, Is.True);
+                var thrown = Assert.Throws<InvalidOperationException>(() => failure.GetOrThrow());
+                Assert.That(thrown, Is.SameAs(error));
+            });
+        }
+
         [Test]
         public void Try_Func_OnSuccess_ReturnsValue()
         {
@@ -884,6 +940,18 @@ namespace Unicore.Tests
 
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Value, Is.EqualTo(42));
+        }
+
+        [UnityTest]
+        public IEnumerator TryAsync_Func_OnSuccess_ReturnsValue()
+        {
+            return UniTask.ToCoroutine(async () =>
+            {
+                var result = await Result.TryAsync(() => UniTask.FromResult(42));
+
+                Assert.That(result.IsSuccess, Is.True);
+                Assert.That(result.Value, Is.EqualTo(42));
+            });
         }
 
         [Test]
@@ -898,6 +966,21 @@ namespace Unicore.Tests
             Assert.That(thrown, Is.SameAs(error));
         }
 
+        [UnityTest]
+        public IEnumerator TryAsync_Func_OnException_ReturnsFailure()
+        {
+            return UniTask.ToCoroutine(async () =>
+            {
+                var error = new InvalidOperationException("boom");
+
+                var result = await Result.TryAsync<int>(() => UniTask.FromException<int>(error));
+
+                Assert.That(result.IsFailure, Is.True);
+                var thrown = Assert.Throws<InvalidOperationException>(() => result.GetOrThrow());
+                Assert.That(thrown, Is.SameAs(error));
+            });
+        }
+
         [Test]
         public void Try_FuncWithContext_UsesContextAndReturnsMappedValue()
         {
@@ -909,6 +992,22 @@ namespace Unicore.Tests
             Assert.That(failure.IsFailure, Is.True);
             var thrown = Assert.Throws<InvalidOperationException>(() => failure.GetOrThrow());
             Assert.That(thrown, Is.SameAs(error));
+        }
+
+        [UnityTest]
+        public IEnumerator TryAsync_FuncWithContext_UsesContextAndReturnsMappedValue()
+        {
+            return UniTask.ToCoroutine(async () =>
+            {
+                var success = await Result.TryAsync("ctx", context => UniTask.FromResult(context.Length));
+                var error = new InvalidOperationException("boom");
+                var failure = await Result.TryAsync("ctx", _ => UniTask.FromException<int>(error));
+
+                Assert.That(success.Value, Is.EqualTo(3));
+                Assert.That(failure.IsFailure, Is.True);
+                var thrown = Assert.Throws<InvalidOperationException>(() => failure.GetOrThrow());
+                Assert.That(thrown, Is.SameAs(error));
+            });
         }
     }
 }
