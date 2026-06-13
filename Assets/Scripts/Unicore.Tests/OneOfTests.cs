@@ -39,6 +39,16 @@ namespace Unicore.Tests
         }
 
         [Test]
+        public void Switch_OnDefaultValue_ThrowsArgumentOutOfRangeExceptionWithMessage()
+        {
+            var oneOf = default(OneOf<int, string>);
+
+            var exception = Assert.Throws<ArgumentOutOfRangeException>(() => oneOf.Switch(_ => { }, _ => { }));
+
+            Assert.That(exception!.Message, Does.StartWith("OneOf is in an invalid state."));
+        }
+
+        [Test]
         public void Switch_WithContext_OnT1_InvokesSelectedActionWithoutThrowing()
         {
             var oneOf = new OneOf<int, string>("boom");
@@ -117,6 +127,16 @@ namespace Unicore.Tests
         }
 
         [Test]
+        public void AsT0_OnT1_ThrowsInvalidOperationExceptionWithMessage()
+        {
+            var oneOf = new OneOf<int, string>("boom");
+
+            var exception = Assert.Throws<InvalidOperationException>(() => _ = oneOf.AsT0);
+
+            Assert.That(exception!.Message, Is.EqualTo("OneOf does not contain a value of type T0."));
+        }
+
+        [Test]
         public void TryGetT0_OnT1_ReturnsFalseAndDefault()
         {
             var oneOf = new OneOf<int, string>("boom");
@@ -136,6 +156,16 @@ namespace Unicore.Tests
 
             Assert.That(result, Is.True);
             Assert.That(value, Is.EqualTo("boom"));
+        }
+
+        [Test]
+        public void AsT1_OnT0_ThrowsInvalidOperationExceptionWithMessage()
+        {
+            var oneOf = new OneOf<int, string>(42);
+
+            var exception = Assert.Throws<InvalidOperationException>(() => _ = oneOf.AsT1);
+
+            Assert.That(exception!.Message, Is.EqualTo("OneOf does not contain a value of type T1."));
         }
 
         [Test]
@@ -198,6 +228,16 @@ namespace Unicore.Tests
 
             Assert.That(mapped.IsT0, Is.True);
             Assert.That(mapped.AsT0, Is.EqualTo(42));
+        }
+
+        [Test]
+        public void Map_OnDefaultValue_ThrowsArgumentOutOfRangeExceptionWithMessage()
+        {
+            var oneOf = default(OneOf<int, string>);
+
+            var exception = Assert.Throws<ArgumentOutOfRangeException>(() => oneOf.Map(value => value, value => value.Length));
+
+            Assert.That(exception!.Message, Does.StartWith("OneOf is in an invalid state."));
         }
 
         [Test]
