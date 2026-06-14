@@ -829,6 +829,122 @@ namespace Unicore.Tests
         }
 
         [Test]
+        public void AsOption_OnSuccess_ReturnsPresentOptionWithSameValue()
+        {
+            var result = Result.Success(15);
+
+            var option = result.AsOption();
+
+            Assert.That(option.IsSome, Is.True);
+            Assert.That(option.Value, Is.EqualTo(15));
+        }
+
+        [Test]
+        public void AsOption_OnFailure_ReturnsEmptyOption()
+        {
+            var result = Result.Failure<int>(new InvalidOperationException("boom"));
+
+            var option = result.AsOption();
+
+            Assert.That(option.IsNone, Is.True);
+        }
+
+        [Test]
+        public void ToResult_ValueExtension_WithNonNullReference_ReturnsSuccessfulResult()
+        {
+            const string value = "hello";
+
+            var result = value.ToResult();
+
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Value, Is.EqualTo(value));
+        }
+
+        [Test]
+        public void ToResult_ValueExtension_WithNullReference_ThrowsArgumentNullException()
+        {
+            string value = null;
+
+            Assert.Throws<ArgumentNullException>(() => value.ToResult());
+        }
+
+        [Test]
+        public void ToResult_FactoryExtension_UsesFactoryResultAndCapturesExceptions()
+        {
+            var called = false;
+            Func<string> successFactory = () =>
+            {
+                called = true;
+                return "value";
+            };
+            var error = new InvalidOperationException("boom");
+            Func<string> failureFactory = () => throw error;
+
+            var success = successFactory.ToResult();
+            var failure = failureFactory.ToResult();
+
+            Assert.That(called, Is.True);
+            Assert.That(success.Value, Is.EqualTo("value"));
+            Assert.That(failure.IsFailure, Is.True);
+            var thrown = Assert.Throws<InvalidOperationException>(() => failure.GetOrThrow());
+            Assert.That(thrown, Is.SameAs(error));
+        }
+
+        [Test]
+        public void ToResult_ContextExtension_PassesContextIntoFactoryAndCapturesExceptions()
+        {
+            var success = "ctx".ToResult(context => $"{context}:value");
+            var error = new InvalidOperationException("boom");
+            var failure = "ctx".ToResult<string, string>(_ => throw error);
+
+            Assert.That(success.Value, Is.EqualTo("ctx:value"));
+            Assert.That(failure.IsFailure, Is.True);
+            var thrown = Assert.Throws<InvalidOperationException>(() => failure.GetOrThrow());
+            Assert.That(thrown, Is.SameAs(error));
+        }
+
+        [UnityTest]
+        public IEnumerator ToResultAsync_FactoryExtension_UsesFactoryResultAndCapturesExceptions()
+        {
+            return UniTask.ToCoroutine(async () =>
+            {
+                var called = false;
+                Func<UniTask<string>> successFactory = () =>
+                {
+                    called = true;
+                    return UniTask.FromResult("value");
+                };
+                var error = new InvalidOperationException("boom");
+                Func<UniTask<string>> failureFactory = () => UniTask.FromException<string>(error);
+
+                var success = await successFactory.ToResultAsync();
+                var failure = await failureFactory.ToResultAsync();
+
+                Assert.That(called, Is.True);
+                Assert.That(success.Value, Is.EqualTo("value"));
+                Assert.That(failure.IsFailure, Is.True);
+                var thrown = Assert.Throws<InvalidOperationException>(() => failure.GetOrThrow());
+                Assert.That(thrown, Is.SameAs(error));
+            });
+        }
+
+        [UnityTest]
+        public IEnumerator ToResultAsync_ContextExtension_PassesContextIntoFactoryAndCapturesExceptions()
+        {
+            return UniTask.ToCoroutine(async () =>
+            {
+                var success = await "ctx".ToResultAsync(context => UniTask.FromResult($"{context}:value"));
+                var error = new InvalidOperationException("boom");
+                var failure = await "ctx".ToResultAsync<string, string>(_ => UniTask.FromException<string>(error));
+
+                Assert.That(success.Value, Is.EqualTo("ctx:value"));
+                Assert.That(failure.IsFailure, Is.True);
+                var thrown = Assert.Throws<InvalidOperationException>(() => failure.GetOrThrow());
+                Assert.That(thrown, Is.SameAs(error));
+            });
+        }
+
+        [Test]
         public void ThrowIfError_OnSuccess_ReturnsSameInstance()
         {
             var result = Result.Success(15);

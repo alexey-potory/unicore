@@ -51,6 +51,172 @@ namespace Unicore.Tests
         }
 
         [Test]
+        public void From_ValueOverload_WithNonNullReference_ReturnsPresentOption()
+        {
+            const string value = "hello";
+
+            var option = Option.From(value);
+
+            Assert.That(option.IsSome, Is.True);
+            Assert.That(option.Value, Is.EqualTo(value));
+        }
+
+        [Test]
+        public void From_ValueOverload_WithNullReference_ReturnsEmptyOption()
+        {
+            string value = null;
+
+            var option = Option.From(value);
+
+            Assert.That(option.IsNone, Is.True);
+        }
+
+        [Test]
+        public void From_FactoryOverload_UsesFactoryResult()
+        {
+            var called = false;
+
+            var some = Option.From(() =>
+            {
+                called = true;
+                return "value";
+            });
+            var none = Option.From(() => (string)null);
+
+            Assert.That(called, Is.True);
+            Assert.That(some.Value, Is.EqualTo("value"));
+            Assert.That(none.IsNone, Is.True);
+        }
+
+        [Test]
+        public void From_ContextOverload_PassesContextIntoFactory()
+        {
+            var some = Option.From("ctx", context => $"{context}:value");
+            var none = Option.From("ctx", _ => (string)null);
+
+            Assert.That(some.Value, Is.EqualTo("ctx:value"));
+            Assert.That(none.IsNone, Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator FromAsync_FactoryOverload_UsesFactoryResult()
+        {
+            return UniTask.ToCoroutine(async () =>
+            {
+                var called = false;
+
+                var some = await Option.FromAsync(() =>
+                {
+                    called = true;
+                    return UniTask.FromResult("value");
+                });
+                var none = await Option.FromAsync(() => UniTask.FromResult<string>(null));
+
+                Assert.That(called, Is.True);
+                Assert.That(some.Value, Is.EqualTo("value"));
+                Assert.That(none.IsNone, Is.True);
+            });
+        }
+
+        [UnityTest]
+        public IEnumerator FromAsync_ContextOverload_PassesContextIntoFactory()
+        {
+            return UniTask.ToCoroutine(async () =>
+            {
+                var some = await Option.FromAsync("ctx", context => UniTask.FromResult($"{context}:value"));
+                var none = await Option.FromAsync("ctx", _ => UniTask.FromResult<string>(null));
+
+                Assert.That(some.Value, Is.EqualTo("ctx:value"));
+                Assert.That(none.IsNone, Is.True);
+            });
+        }
+
+        [Test]
+        public void ToOption_ValueExtension_WithNonNullReference_ReturnsPresentOption()
+        {
+            const string value = "hello";
+
+            var option = value.ToOption();
+
+            Assert.That(option.IsSome, Is.True);
+            Assert.That(option.Value, Is.EqualTo(value));
+        }
+
+        [Test]
+        public void ToOption_ValueExtension_WithNullReference_ReturnsEmptyOption()
+        {
+            string value = null;
+
+            var option = value.ToOption();
+
+            Assert.That(option.IsNone, Is.True);
+        }
+
+        [Test]
+        public void ToOption_FactoryExtension_UsesFactoryResult()
+        {
+            var called = false;
+            Func<string> someFactory = () =>
+            {
+                called = true;
+                return "value";
+            };
+            Func<string> noneFactory = () => null;
+
+            var some = someFactory.ToOption();
+            var none = noneFactory.ToOption();
+
+            Assert.That(called, Is.True);
+            Assert.That(some.Value, Is.EqualTo("value"));
+            Assert.That(none.IsNone, Is.True);
+        }
+
+        [Test]
+        public void ToOption_ContextExtension_PassesContextIntoFactory()
+        {
+            var some = "ctx".ToOption(context => $"{context}:value");
+            var none = "ctx".ToOption(_ => (string)null);
+
+            Assert.That(some.Value, Is.EqualTo("ctx:value"));
+            Assert.That(none.IsNone, Is.True);
+        }
+
+        [UnityTest]
+        public IEnumerator ToOptionAsync_FactoryExtension_UsesFactoryResult()
+        {
+            return UniTask.ToCoroutine(async () =>
+            {
+                var called = false;
+                Func<UniTask<string>> someFactory = () =>
+                {
+                    called = true;
+                    return UniTask.FromResult("value");
+                };
+                Func<UniTask<string>> noneFactory = () => UniTask.FromResult<string>(null);
+
+                var some = await someFactory.ToOptionAsync();
+                var none = await noneFactory.ToOptionAsync();
+
+                Assert.That(called, Is.True);
+                Assert.That(some.Value, Is.EqualTo("value"));
+                Assert.That(none.IsNone, Is.True);
+            });
+        }
+
+        [UnityTest]
+        public IEnumerator ToOptionAsync_ContextExtension_PassesContextIntoFactory()
+        {
+            return UniTask.ToCoroutine(async () =>
+            {
+                var some = await "ctx".ToOptionAsync(context => UniTask.FromResult($"{context}:value"));
+                var none = await "ctx".ToOptionAsync(_ => UniTask.FromResult<string>(null));
+
+                Assert.That(some.Value, Is.EqualTo("ctx:value"));
+                Assert.That(none.IsNone, Is.True);
+            });
+        }
+
+        [Test]
         public void Value_OnNone_ThrowsInvalidOperationException()
         {
             var option = Option.None<int>();

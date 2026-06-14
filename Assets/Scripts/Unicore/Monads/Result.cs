@@ -345,6 +345,15 @@ namespace Unicore.Monads
         /// <returns>A task that produces current successful result or a new successful fallback result.</returns>
         public abstract UniTask<Result<T>> EnsureAsync<TContext>(TContext context,
             Func<TContext, UniTask<T>> defaultValueFactory);
+
+        /// <summary>
+        /// Converts current result into an option by keeping successful value and dropping failure details.
+        /// </summary>
+        /// <returns>An option that contains successful value when result is successful; otherwise, an empty option.</returns>
+        public Option<T> AsOption() =>
+            IsSuccess 
+                ? Option.Some(Value) 
+                : Option<T>.None();
     }
 
     /// <summary>

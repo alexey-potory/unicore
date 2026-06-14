@@ -306,5 +306,69 @@ namespace Unicore.Monads
         /// <typeparam name="T">Type of value the option may contain.</typeparam>
         /// <returns>An option with no value.</returns>
         public static Option<T> None<T>() => new None<T>();
+
+        /// <summary>
+        /// Creates an option from a reference value.
+        /// </summary>
+        /// <typeparam name="T">Type of wrapped reference value.</typeparam>
+        /// <param name="value">A value to wrap.</param>
+        /// <returns>An option that contains <paramref name="value" /> when it is not <see langword="null" />; otherwise, an empty option.</returns>
+        public static Option<T> From<T>(T value) where T : class =>
+            value == null
+                ? None<T>()
+                : Some(value);
+
+        /// <summary>
+        /// Creates an option from a reference value produced by a factory.
+        /// </summary>
+        /// <typeparam name="T">Type of wrapped reference value.</typeparam>
+        /// <param name="func">A factory that produces a value to wrap.</param>
+        /// <returns>An option that contains produced value when it is not <see langword="null" />; otherwise, an empty option.</returns>
+        public static Option<T> From<T>(Func<T> func) where T : class =>
+            From(func());
+
+        /// <summary>
+        /// Creates an option from a reference value produced by a context-aware factory.
+        /// </summary>
+        /// <typeparam name="TContext">Type of shared context.</typeparam>
+        /// <typeparam name="T">Type of wrapped reference value.</typeparam>
+        /// <param name="context">A context value passed to <paramref name="func" />.</param>
+        /// <param name="func">A factory that produces a value to wrap.</param>
+        /// <returns>An option that contains produced value when it is not <see langword="null" />; otherwise, an empty option.</returns>
+        public static Option<T> From<TContext, T>(TContext context, Func<TContext, T> func) where T : class
+        {
+            var result = func(context);
+
+            return result == null
+                ? None<T>()
+                : Some(result);
+        }
+
+        /// <summary>
+        /// Creates an option from a reference value produced asynchronously by a factory.
+        /// </summary>
+        /// <typeparam name="T">Type of wrapped reference value.</typeparam>
+        /// <param name="func">A factory that produces a value to wrap.</param>
+        /// <returns>A task that produces an option that contains produced value when it is not <see langword="null" />; otherwise, an empty option.</returns>
+        public static async UniTask<Option<T>> FromAsync<T>(Func<UniTask<T>> func) where T : class =>
+            From(await func());
+
+        /// <summary>
+        /// Creates an option from a reference value produced asynchronously by a context-aware factory.
+        /// </summary>
+        /// <typeparam name="TContext">Type of shared context.</typeparam>
+        /// <typeparam name="T">Type of wrapped reference value.</typeparam>
+        /// <param name="context">A context value passed to <paramref name="func" />.</param>
+        /// <param name="func">A factory that produces a value to wrap.</param>
+        /// <returns>A task that produces an option that contains produced value when it is not <see langword="null" />; otherwise, an empty option.</returns>
+        public static async UniTask<Option<T>> FromAsync<TContext, T>(TContext context, Func<TContext, UniTask<T>> func)
+            where T : class
+        {
+            var result = await func(context);
+
+            return result == null
+                ? None<T>()
+                : Some(result);
+        }
     }
 }
