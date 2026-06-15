@@ -29,7 +29,7 @@ namespace Unicore.Math
         /// <summary>
         /// Gets identity transform.
         /// </summary>
-        public static Matrix2d Identity => new Matrix2d(1f, 0f, 0f, 0f, 1f, 0f);
+        public static Matrix2d Identity => new(1f, 0f, 0f, 0f, 1f, 0f);
 
         /// <summary>
         /// Gets matrix determinant of linear 2x2 part.
@@ -39,17 +39,17 @@ namespace Unicore.Math
         /// <summary>
         /// Gets translation component.
         /// </summary>
-        public Vector2 Position => new Vector2(_m02, _m12);
+        public Vector2 Position => new(_m02, _m12);
 
         /// <summary>
         /// Gets transformed X basis vector.
         /// </summary>
-        public Vector2 Right => new Vector2(_m00, _m10);
+        public Vector2 Right => new(_m00, _m10);
 
         /// <summary>
         /// Gets transformed Y basis vector.
         /// </summary>
-        public Vector2 Up => new Vector2(_m01, _m11);
+        public Vector2 Up => new(_m01, _m11);
 
         /// <summary>
         /// Creates transform from translation, rotation in radians, and scale.
@@ -60,8 +60,8 @@ namespace Unicore.Math
         /// <returns>Affine transform that applies scale, then rotation, then translation.</returns>
         public static Matrix2d TRS(Vector2 position, float rotationRadians, Vector2 scale)
         {
-            var cosine = Mathf.Cos(rotationRadians);
-            var sine = Mathf.Sin(rotationRadians);
+            float cosine = Mathf.Cos(rotationRadians);
+            float sine = Mathf.Sin(rotationRadians);
 
             return new Matrix2d(
                 cosine * scale.x,
@@ -77,7 +77,7 @@ namespace Unicore.Math
         /// </summary>
         /// <param name="offset">Translation offset.</param>
         /// <returns>Translation transform.</returns>
-        public static Matrix2d Translate(Vector2 offset) => new Matrix2d(1f, 0f, offset.x, 0f, 1f, offset.y);
+        public static Matrix2d Translate(Vector2 offset) => new(1f, 0f, offset.x, 0f, 1f, offset.y);
 
         /// <summary>
         /// Creates rotation matrix around origin.
@@ -86,8 +86,8 @@ namespace Unicore.Math
         /// <returns>Rotation transform.</returns>
         public static Matrix2d Rotate(float radians)
         {
-            var cosine = Mathf.Cos(radians);
-            var sine = Mathf.Sin(radians);
+            float cosine = Mathf.Cos(radians);
+            float sine = Mathf.Sin(radians);
 
             return new Matrix2d(cosine, -sine, 0f, sine, cosine, 0f);
         }
@@ -97,7 +97,7 @@ namespace Unicore.Math
         /// </summary>
         /// <param name="scale">Per-axis scale.</param>
         /// <returns>Scale transform.</returns>
-        public static Matrix2d Scale(Vector2 scale) => new Matrix2d(scale.x, 0f, 0f, 0f, scale.y, 0f);
+        public static Matrix2d Scale(Vector2 scale) => new(scale.x, 0f, 0f, 0f, scale.y, 0f);
 
         /// <summary>
         /// Returns matrix composition with another transform.
@@ -146,7 +146,7 @@ namespace Unicore.Math
         /// <exception cref="InvalidOperationException">Matrix is singular and cannot be inverted.</exception>
         public Matrix2d Inverse()
         {
-            if (!TryInverse(out var inverse))
+            if (!TryInverse(out Matrix2d inverse))
             {
                 throw new InvalidOperationException("Matrix2d is singular and cannot be inverted.");
             }
@@ -161,20 +161,20 @@ namespace Unicore.Math
         /// <returns><see langword="true" /> if inversion succeeds; otherwise, <see langword="false" />.</returns>
         public bool TryInverse(out Matrix2d inverse)
         {
-            var determinant = Determinant;
+            float determinant = Determinant;
             if (Mathf.Approximately(determinant, 0f))
             {
                 inverse = default;
                 return false;
             }
 
-            var inverseDeterminant = 1f / determinant;
-            var m00 = _m11 * inverseDeterminant;
-            var m01 = -_m01 * inverseDeterminant;
-            var m10 = -_m10 * inverseDeterminant;
-            var m11 = _m00 * inverseDeterminant;
-            var m02 = -m00 * _m02 - m01 * _m12;
-            var m12 = -m10 * _m02 - m11 * _m12;
+            float inverseDeterminant = 1f / determinant;
+            float m00 = _m11 * inverseDeterminant;
+            float m01 = -_m01 * inverseDeterminant;
+            float m10 = -_m10 * inverseDeterminant;
+            float m11 = _m00 * inverseDeterminant;
+            float m02 = -m00 * _m02 - m01 * _m12;
+            float m12 = -m10 * _m02 - m11 * _m12;
 
             inverse = new Matrix2d(m00, m01, m02, m10, m11, m12);
             return true;

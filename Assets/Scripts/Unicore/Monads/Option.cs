@@ -337,7 +337,7 @@ namespace Unicore.Monads
         /// <returns>An option that contains produced value when it is not <see langword="null" />; otherwise, an empty option.</returns>
         public static Option<T> From<TContext, T>(TContext context, Func<TContext, T> func) where T : class
         {
-            var result = func(context);
+            T result = func(context);
 
             return result == null
                 ? None<T>()
@@ -364,7 +364,7 @@ namespace Unicore.Monads
         public static async UniTask<Option<T>> FromAsync<TContext, T>(TContext context, Func<TContext, UniTask<T>> func)
             where T : class
         {
-            var result = await func(context);
+            T result = await func(context);
 
             return result == null
                 ? None<T>()

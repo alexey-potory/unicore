@@ -8,7 +8,7 @@
 
         public bool IsSatisfiedBy(T value)
         {
-            foreach (var rule in _rules)
+            foreach (Spec<T>.ISpecRule rule in _rules)
             {
                 if (!rule.IsSatisfiedBy(value))
                     return false;

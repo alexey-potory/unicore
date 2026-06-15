@@ -103,8 +103,8 @@ namespace Unicore.Math
         /// <returns>Expanded or shrunk range.</returns>
         public Range Expand(float amount)
         {
-            var center = Center;
-            var halfLength = Length * 0.5f + amount;
+            float center = Center;
+            float halfLength = Length * 0.5f + amount;
 
             if (halfLength <= 0f)
             {
@@ -119,7 +119,7 @@ namespace Unicore.Math
         /// </summary>
         /// <param name="other">Range to include.</param>
         /// <returns>Union range.</returns>
-        public Range Union(Range other) => new Range(Mathf.Min(_min, other._min), Mathf.Max(_max, other._max));
+        public Range Union(Range other) => new(Mathf.Min(_min, other._min), Mathf.Max(_max, other._max));
 
         /// <summary>
         /// Returns shared overlap with another range when it exists.
@@ -128,9 +128,9 @@ namespace Unicore.Math
         /// <returns>Intersection range, or <see langword="null" /> when ranges do not overlap.</returns>
         public Range? Intersection(Range other)
         {
-            return TryIntersection(other, out var intersection)
+            return TryIntersection(other, out Range intersection)
                 ? intersection
-                : (Range?)null;
+                : null;
         }
 
         /// <summary>
@@ -141,8 +141,8 @@ namespace Unicore.Math
         /// <returns><see langword="true" /> if overlap exists; otherwise, <see langword="false" />.</returns>
         public bool TryIntersection(Range other, out Range intersection)
         {
-            var min = Mathf.Max(_min, other._min);
-            var max = Mathf.Min(_max, other._max);
+            float min = Mathf.Max(_min, other._min);
+            float max = Mathf.Min(_max, other._max);
 
             if (min > max)
             {

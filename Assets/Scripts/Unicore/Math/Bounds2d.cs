@@ -58,12 +58,12 @@ namespace Unicore.Math
         /// <summary>
         /// Gets center point.
         /// </summary>
-        public Vector2 Center => new Vector2(_centerX, _centerY);
+        public Vector2 Center => new(_centerX, _centerY);
 
         /// <summary>
         /// Gets bounds size.
         /// </summary>
-        public Vector2 Size => new Vector2(_width, _height);
+        public Vector2 Size => new(_width, _height);
 
         /// <summary>
         /// Gets half-size of bounds.
@@ -108,10 +108,10 @@ namespace Unicore.Math
         /// <returns>Bounds that span between normalized corners.</returns>
         public static Bounds2d FromMinMax(Vector2 min, Vector2 max)
         {
-            var minX = Mathf.Min(min.x, max.x);
-            var minY = Mathf.Min(min.y, max.y);
-            var maxX = Mathf.Max(min.x, max.x);
-            var maxY = Mathf.Max(min.y, max.y);
+            float minX = Mathf.Min(min.x, max.x);
+            float minY = Mathf.Min(min.y, max.y);
+            float maxX = Mathf.Max(min.x, max.x);
+            float maxY = Mathf.Max(min.y, max.y);
 
             return new Bounds2d(
                 (minX + maxX) * 0.5f,
@@ -127,8 +127,8 @@ namespace Unicore.Math
         /// <returns><see langword="true" /> if point lies inside or on edge; otherwise, <see langword="false" />.</returns>
         public bool Contains(Vector2 point)
         {
-            var min = Min;
-            var max = Max;
+            Vector2 min = Min;
+            Vector2 max = Max;
 
             return point.x >= min.x &&
                    point.x <= max.x &&
@@ -143,8 +143,8 @@ namespace Unicore.Math
         /// <returns><see langword="true" /> if all corners of <paramref name="other" /> lie inside current bounds.</returns>
         public bool Contains(Bounds2d other)
         {
-            var otherMin = other.Min;
-            var otherMax = other.Max;
+            Vector2 otherMin = other.Min;
+            Vector2 otherMax = other.Max;
             return Contains(otherMin) && Contains(otherMax);
         }
 
@@ -155,10 +155,10 @@ namespace Unicore.Math
         /// <returns><see langword="true" /> when bounds share area or edge; otherwise, <see langword="false" />.</returns>
         public bool Overlaps(Bounds2d other)
         {
-            var min = Min;
-            var max = Max;
-            var otherMin = other.Min;
-            var otherMax = other.Max;
+            Vector2 min = Min;
+            Vector2 max = Max;
+            Vector2 otherMin = other.Min;
+            Vector2 otherMax = other.Max;
 
             return min.x <= otherMax.x &&
                    max.x >= otherMin.x &&
@@ -173,8 +173,8 @@ namespace Unicore.Math
         /// <returns>New bounds that contain both current bounds and <paramref name="point" />.</returns>
         public Bounds2d Encapsulate(Vector2 point)
         {
-            var min = Min;
-            var max = Max;
+            Vector2 min = Min;
+            Vector2 max = Max;
 
             return FromMinMax(
                 new Vector2(Mathf.Min(min.x, point.x), Mathf.Min(min.y, point.y)),
@@ -188,10 +188,10 @@ namespace Unicore.Math
         /// <returns>New bounds that contain both current bounds and <paramref name="other" />.</returns>
         public Bounds2d Encapsulate(Bounds2d other)
         {
-            var min = Min;
-            var max = Max;
-            var otherMin = other.Min;
-            var otherMax = other.Max;
+            Vector2 min = Min;
+            Vector2 max = Max;
+            Vector2 otherMin = other.Min;
+            Vector2 otherMax = other.Max;
 
             return FromMinMax(
                 new Vector2(Mathf.Min(min.x, otherMin.x), Mathf.Min(min.y, otherMin.y)),
@@ -212,9 +212,9 @@ namespace Unicore.Math
         /// <returns>Intersection bounds, or <see langword="null" /> when bounds are disjoint.</returns>
         public Bounds2d? Intersection(Bounds2d other)
         {
-            return TryIntersection(other, out var intersection)
+            return TryIntersection(other, out Bounds2d intersection)
                 ? intersection
-                : (Bounds2d?)null;
+                : null;
         }
 
         /// <summary>
@@ -225,15 +225,15 @@ namespace Unicore.Math
         /// <returns><see langword="true" /> when overlap exists; otherwise, <see langword="false" />.</returns>
         public bool TryIntersection(Bounds2d other, out Bounds2d intersection)
         {
-            var min = Min;
-            var max = Max;
-            var otherMin = other.Min;
-            var otherMax = other.Max;
+            Vector2 min = Min;
+            Vector2 max = Max;
+            Vector2 otherMin = other.Min;
+            Vector2 otherMax = other.Max;
 
-            var left = Mathf.Max(min.x, otherMin.x);
-            var bottom = Mathf.Max(min.y, otherMin.y);
-            var right = Mathf.Min(max.x, otherMax.x);
-            var top = Mathf.Min(max.y, otherMax.y);
+            float left = Mathf.Max(min.x, otherMin.x);
+            float bottom = Mathf.Max(min.y, otherMin.y);
+            float right = Mathf.Min(max.x, otherMax.x);
+            float top = Mathf.Min(max.y, otherMax.y);
 
             if (left > right || bottom > top)
             {
@@ -252,8 +252,8 @@ namespace Unicore.Math
         /// <returns>Point moved into bounds if necessary.</returns>
         public Vector2 ClampPoint(Vector2 point)
         {
-            var min = Min;
-            var max = Max;
+            Vector2 min = Min;
+            Vector2 max = Max;
 
             return new Vector2(
                 Mathf.Clamp(point.x, min.x, max.x),

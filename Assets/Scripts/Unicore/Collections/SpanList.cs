@@ -132,9 +132,9 @@ namespace Unicore.Collections
                 throw new ArgumentNullException(nameof(match));
             }
 
-            for (var i = 0; i < _count; i++)
+            for (int i = 0; i < _count; i++)
             {
-                var item = _span[i];
+                T item = _span[i];
                 if (match(item))
                 {
                     return item;
@@ -157,7 +157,7 @@ namespace Unicore.Collections
                 throw new ArgumentNullException(nameof(match));
             }
 
-            for (var i = 0; i < _count; i++)
+            for (int i = 0; i < _count; i++)
             {
                 if (match(_span[i]))
                 {
@@ -182,9 +182,9 @@ namespace Unicore.Collections
                 throw new ArgumentNullException(nameof(match));
             }
 
-            for (var i = 0; i < _count; i++)
+            for (int i = 0; i < _count; i++)
             {
-                var item = _span[i];
+                T item = _span[i];
                 if (match(item))
                 {
                     value = item;
@@ -203,9 +203,9 @@ namespace Unicore.Collections
         /// <returns>A zero-based logical index of matching value, or <c>-1</c> when value is not found.</returns>
         public int IndexOf(T item)
         {
-            var comparer = EqualityComparer<T>.Default;
+            EqualityComparer<T> comparer = EqualityComparer<T>.Default;
 
-            for (var i = 0; i < _count; i++)
+            for (int i = 0; i < _count; i++)
             {
                 if (comparer.Equals(_span[i], item))
                 {
@@ -266,7 +266,7 @@ namespace Unicore.Collections
         {
             EnsureValidIndex(index);
 
-            var sourceIndex = index + 1;
+            int sourceIndex = index + 1;
             if (sourceIndex < _count)
             {
                 _span.Slice(sourceIndex, _count - sourceIndex).CopyTo(_span.Slice(index));
@@ -283,7 +283,7 @@ namespace Unicore.Collections
         /// <returns><see langword="true" /> if matching value was removed; otherwise, <see langword="false" />.</returns>
         public bool Remove(T item)
         {
-            var index = IndexOf(item);
+            int index = IndexOf(item);
             if (index < 0)
             {
                 return false;
@@ -301,7 +301,7 @@ namespace Unicore.Collections
         /// <returns><see langword="true" /> if matching value was removed; otherwise, <see langword="false" />.</returns>
         public bool TryRemove(T item, out T removed)
         {
-            var index = IndexOf(item);
+            int index = IndexOf(item);
             if (index < 0)
             {
                 removed = default;
@@ -326,10 +326,10 @@ namespace Unicore.Collections
                 throw new ArgumentNullException(nameof(match));
             }
 
-            var writeIndex = 0;
-            for (var readIndex = 0; readIndex < _count; readIndex++)
+            int writeIndex = 0;
+            for (int readIndex = 0; readIndex < _count; readIndex++)
             {
-                var item = _span[readIndex];
+                T item = _span[readIndex];
                 if (!match(item))
                 {
                     _span[writeIndex] = item;
@@ -337,7 +337,7 @@ namespace Unicore.Collections
                 }
             }
 
-            var removedCount = _count - writeIndex;
+            int removedCount = _count - writeIndex;
             if (removedCount > 0)
             {
                 _span.Slice(writeIndex, removedCount).Clear();
@@ -359,8 +359,8 @@ namespace Unicore.Collections
                 throw new InvalidOperationException("SpanList is empty.");
             }
 
-            var lastIndex = _count - 1;
-            var item = _span[lastIndex];
+            int lastIndex = _count - 1;
+            T item = _span[lastIndex];
             _span[lastIndex] = default;
             _count = lastIndex;
             return item;
@@ -393,7 +393,7 @@ namespace Unicore.Collections
         /// <returns>An array that contains current list contents.</returns>
         public T[] ToArray()
         {
-            var result = new T[_count];
+            T[] result = new T[_count];
             AsSpan().CopyTo(result);
             return result;
         }
@@ -402,7 +402,7 @@ namespace Unicore.Collections
         /// Returns enumerator that iterates current list contents.
         /// </summary>
         /// <returns>An enumerator over initialized values.</returns>
-        public Enumerator GetEnumerator() => new Enumerator(AsSpan());
+        public Enumerator GetEnumerator() => new(AsSpan());
 
         private void EnsureValidIndex(int index)
         {
@@ -446,7 +446,7 @@ namespace Unicore.Collections
             /// <returns><see langword="true" /> if next value is available; otherwise, <see langword="false" />.</returns>
             public bool MoveNext()
             {
-                var nextIndex = _index + 1;
+                int nextIndex = _index + 1;
                 if (nextIndex >= _span.Length)
                 {
                     return false;

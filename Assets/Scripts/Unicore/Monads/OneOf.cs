@@ -542,10 +542,10 @@ namespace Unicore.Monads
         }
 
         private static InvalidOperationException CreateWrongBranchException(string branchName)
-            => new InvalidOperationException($"OneOf does not contain a value of type {branchName}.");
+            => new($"OneOf does not contain a value of type {branchName}.");
 
         private static ArgumentOutOfRangeException CreateInvalidStateException()
-            => new ArgumentOutOfRangeException(nameof(OneOf<T0, T1>), "OneOf is in an invalid state.");
+            => new(nameof(OneOf<T0, T1>), "OneOf is in an invalid state.");
 
         /// <summary>
         /// Determines whether two unions are equal.

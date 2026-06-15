@@ -36,7 +36,7 @@ namespace Unicore.Math
         /// </summary>
         /// <param name="points">Polygon points in winding order.</param>
         /// <returns>Shape built from given points.</returns>
-        public static Shape2d FromPoints(params Vector2[] points) => new Shape2d(points);
+        public static Shape2d FromPoints(params Vector2[] points) => new(points);
 
         /// <summary>
         /// Gets number of points in shape.
@@ -71,12 +71,12 @@ namespace Unicore.Math
                     return default;
                 }
 
-                var min = _points[0];
-                var max = _points[0];
+                Vector2 min = _points[0];
+                Vector2 max = _points[0];
 
-                for (var i = 1; i < Count; i++)
+                for (int i = 1; i < Count; i++)
                 {
-                    var point = _points[i];
+                    Vector2 point = _points[i];
                     min = Vector2.Min(min, point);
                     max = Vector2.Max(max, point);
                 }
@@ -141,21 +141,21 @@ namespace Unicore.Math
                     return IsPointOnSegment(point, _points[0], _points[1]);
             }
 
-            var contains = false;
-            var previous = _points[Count - 1];
+            bool contains = false;
+            Vector2 previous = _points[Count - 1];
 
-            for (var i = 0; i < Count; i++)
+            for (int i = 0; i < Count; i++)
             {
-                var current = _points[i];
+                Vector2 current = _points[i];
                 if (IsPointOnSegment(point, previous, current))
                 {
                     return true;
                 }
 
-                var crossesScanline = (current.y > point.y) != (previous.y > point.y);
+                bool crossesScanline = (current.y > point.y) != (previous.y > point.y);
                 if (crossesScanline)
                 {
-                    var intersectionX = (previous.x - current.x) * (point.y - current.y) / (previous.y - current.y) + current.x;
+                    float intersectionX = (previous.x - current.x) * (point.y - current.y) / (previous.y - current.y) + current.x;
                     if (point.x < intersectionX)
                     {
                         contains = !contains;
@@ -183,12 +183,12 @@ namespace Unicore.Math
                     return Vector2.Distance(_points[0], _points[1]) * 2f;
             }
 
-            var perimeter = 0f;
-            var previous = _points[Count - 1];
+            float perimeter = 0f;
+            Vector2 previous = _points[Count - 1];
 
-            for (var i = 0; i < Count; i++)
+            for (int i = 0; i < Count; i++)
             {
-                var current = _points[i];
+                Vector2 current = _points[i];
                 perimeter += Vector2.Distance(previous, current);
                 previous = current;
             }
@@ -212,15 +212,15 @@ namespace Unicore.Math
                     return (_points[0] + _points[1]) * 0.5f;
             }
 
-            var twiceSignedArea = 0f;
-            var centroidX = 0f;
-            var centroidY = 0f;
-            var previous = _points[Count - 1];
+            float twiceSignedArea = 0f;
+            float centroidX = 0f;
+            float centroidY = 0f;
+            Vector2 previous = _points[Count - 1];
 
-            for (var i = 0; i < Count; i++)
+            for (int i = 0; i < Count; i++)
             {
-                var current = _points[i];
-                var cross = previous.x * current.y - current.x * previous.y;
+                Vector2 current = _points[i];
+                float cross = previous.x * current.y - current.x * previous.y;
                 twiceSignedArea += cross;
                 centroidX += (previous.x + current.x) * cross;
                 centroidY += (previous.y + current.y) * cross;
@@ -232,7 +232,7 @@ namespace Unicore.Math
                 return GetAveragePoint();
             }
 
-            var factor = 1f / (3f * twiceSignedArea);
+            float factor = 1f / (3f * twiceSignedArea);
             return new Vector2(centroidX * factor, centroidY * factor);
         }
 
@@ -262,8 +262,8 @@ namespace Unicore.Math
                 return new Shape2d(Array.Empty<Vector2>(), false);
             }
 
-            var transformed = new Vector2[Count];
-            for (var i = 0; i < Count; i++)
+            Vector2[] transformed = new Vector2[Count];
+            for (int i = 0; i < Count; i++)
             {
                 transformed[i] = matrix.TransformPoint(_points[i]);
             }
@@ -282,8 +282,8 @@ namespace Unicore.Math
                 return new Shape2d(ToArray(), false);
             }
 
-            var reversed = new Vector2[Count];
-            for (var i = 0; i < Count; i++)
+            Vector2[] reversed = new Vector2[Count];
+            for (int i = 0; i < Count; i++)
             {
                 reversed[i] = _points[Count - 1 - i];
             }
@@ -299,7 +299,7 @@ namespace Unicore.Math
                 return false;
             }
 
-            for (var i = 0; i < Count; i++)
+            for (int i = 0; i < Count; i++)
             {
                 if (_points[i] != other._points[i])
                 {
@@ -316,8 +316,8 @@ namespace Unicore.Math
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            var hash = new HashCode();
-            for (var i = 0; i < Count; i++)
+            HashCode hash = new HashCode();
+            for (int i = 0; i < Count; i++)
             {
                 hash.Add(_points[i]);
             }
@@ -341,12 +341,12 @@ namespace Unicore.Math
                 return 0f;
             }
 
-            var sum = 0f;
-            var previous = _points[Count - 1];
+            float sum = 0f;
+            Vector2 previous = _points[Count - 1];
 
-            for (var i = 0; i < Count; i++)
+            for (int i = 0; i < Count; i++)
             {
-                var current = _points[i];
+                Vector2 current = _points[i];
                 sum += previous.x * current.y - current.x * previous.y;
                 previous = current;
             }
@@ -361,8 +361,8 @@ namespace Unicore.Math
                 return Vector2.zero;
             }
 
-            var sum = Vector2.zero;
-            for (var i = 0; i < Count; i++)
+            Vector2 sum = Vector2.zero;
+            for (int i = 0; i < Count; i++)
             {
                 sum += _points[i];
             }
@@ -374,21 +374,21 @@ namespace Unicore.Math
 
         private static bool IsPointOnSegment(Vector2 point, Vector2 start, Vector2 end)
         {
-            var segment = end - start;
-            var toPoint = point - start;
-            var cross = segment.x * toPoint.y - segment.y * toPoint.x;
+            Vector2 segment = end - start;
+            Vector2 toPoint = point - start;
+            float cross = segment.x * toPoint.y - segment.y * toPoint.x;
             if (Mathf.Abs(cross) > Mathf.Epsilon)
             {
                 return false;
             }
 
-            var dot = Vector2.Dot(toPoint, segment);
+            float dot = Vector2.Dot(toPoint, segment);
             if (dot < -Mathf.Epsilon)
             {
                 return false;
             }
 
-            var squaredLength = segment.sqrMagnitude;
+            float squaredLength = segment.sqrMagnitude;
             return dot - squaredLength <= Mathf.Epsilon;
         }
     }

@@ -181,9 +181,9 @@ namespace Unicore.Monads
 
         private static ISpecRule[] ToRules(Spec<T>[] specs)
         {
-            var rules = new ISpecRule[specs.Length];
+            ISpecRule[] rules = new ISpecRule[specs.Length];
 
-            for (var i = 0; i < specs.Length; i++)
+            for (int i = 0; i < specs.Length; i++)
                 rules[i] = specs[i]._rule;
 
             return rules;
