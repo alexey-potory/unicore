@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Unicore.Monads.Internal
 {
-    internal sealed class Failure<T> : Result<T>
+    public sealed class Failure<T> : Result<T>
     {
         private readonly Exception _error;
         public override bool IsSuccess => false;

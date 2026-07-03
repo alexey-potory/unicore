@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 
 namespace Unicore.Monads.Internal
 {
-    internal sealed class Some<T> : Option<T>
+    public sealed class Some<T> : Option<T>
     {
         private readonly T _value;
         public override bool IsSome => true;

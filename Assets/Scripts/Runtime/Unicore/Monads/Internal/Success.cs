@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 
 namespace Unicore.Monads.Internal
 {
-    internal sealed class Success<T> : Result<T>
+    public sealed class Success<T> : Result<T>
     {
         private readonly T _value;
         public override bool IsSuccess => true;

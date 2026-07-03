@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 
 namespace Unicore.Monads.Internal
 {
-    internal sealed class None<T> : Option<T>
+    public sealed class None<T> : Option<T>
     {
         public override bool IsSome => false;
 
