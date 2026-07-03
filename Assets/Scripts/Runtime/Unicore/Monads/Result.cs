@@ -305,6 +305,28 @@ namespace Unicore.Monads
             Func<TContext, UniTask<T>> defaultValueFactory);
 
         /// <summary>
+        /// Attempts to get the successful value.
+        /// </summary>
+        /// <param name="value">
+        /// When this method returns, contains the successful value if the result is successful;
+        /// otherwise, the default value of <typeparamref name="T" />.
+        /// </param>
+        /// <returns>
+        /// <see langword="true" /> if the result is successful; otherwise, <see langword="false" />.
+        /// </returns>
+        public bool TryGetValue(out T value)
+        {
+            if (!IsSuccess)
+            {
+                value = default;
+                return false;
+            }
+            
+            value = GetOrThrow();
+            return true;
+        }
+
+        /// <summary>
         /// Converts failed result into successful result with provided fallback value.
         /// </summary>
         /// <param name="defaultValue">A fallback value.</param>
